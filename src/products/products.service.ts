@@ -103,4 +103,27 @@ export class ProductsService {
       message: `Product with id ${id} has been disabled`
     }
   }
+
+  async validateProducts(ids: number[]) {
+
+    ids = Array.from(new Set(ids));
+
+    const products = await this.prisma.product.findMany({
+      where: {
+        id: {
+          in: ids
+        },
+        available: true
+      }
+    })
+
+    if (products.length !== ids.length) {
+      throw new RpcException({
+        message: `Some products are not available`,
+        status: HttpStatus.BAD_REQUEST
+      })
+    }
+
+    return products;
+  }
 }
